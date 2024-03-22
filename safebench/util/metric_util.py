@@ -118,6 +118,7 @@ def get_route_scores(record_dict, time_out=30):
     all_scores['final_score'] = final_score
 
     return all_scores
+
 def compute_ap(recall, precision, method='interp'):
     """ Compute the average precision, given the recall and precision curves
     # Arguments
@@ -145,8 +146,20 @@ def compute_ap(recall, precision, method='interp'):
 
     return ap, mpre_input, mpre, mrec
 
-
 def _get_pr_curve(conf_scores, logits, num_gt, data_id, iou_thres=0.5):
+    eps = 1e-8
+    idx = torch.argsort(conf_scores, descending=True)
+    logits = logits[idx]
+    tp = torch.cumsum(logits >= iou_thres, dim=0)
+    tp_fp = torch.cumsum(logits >= -0., dim=0)
+    precision = (tp / tp_fp).numpy()
+    recall = (tp / (num_gt + eps)).numpy()
+
+    ap, mpre_input, mpre, mrec = compute_ap(recall, precision, method='continuous')
+    return ap
+
+
+def _get_pr_ap(conf_scores, logits, num_gt, data_id, iou_thres=0.5):
     eps = 1e-8
     idx = torch.argsort(conf_scores, descending=True)
     logits = logits[idx]
@@ -166,6 +179,7 @@ def get_perception_scores(record_dict):
     gt = []
     cls = []
     scores = []
+    stdAP = []
     for data_id in record_dict.keys():
         IoU_list.append([rec['iou'] for rec in record_dict[data_id]])
         conf_scores = torch.cat([rec['scores'] for rec in record_dict[data_id]])
@@ -177,6 +191,7 @@ def get_perception_scores(record_dict):
             map_iou.append(_get_pr_ap(conf_scores, logits, num_gt, data_id, iou_thres=th))
 
         mAP.append(np.mean(map_iou))
+        stdAP.append(np.std(map_iou))
         pred.append([rec['pred'] for rec in record_dict[data_id]])
         gt.append([rec['gt'] for rec in record_dict[data_id]])
         cls.append([rec['class'] for rec in record_dict[data_id]])
@@ -184,15 +199,14 @@ def get_perception_scores(record_dict):
 
     IoU_mean = [np.mean(iou) for iou in IoU_list]
     
-
-
     return {
         # 'scores': scores,
         # 'pred': pred,
         # 'gt': gt,
         # 'class': cls,
         'mean_iou': IoU_mean,
-        'mAP_evaluate': mAP, 
+        'mAP_evaluate': mAP,
+        'stdAP_evaluate': stdAP 
     }
 
 
