@@ -1,0 +1,2 @@
+Stopsign: Stopsign.jpg
+Model: YOLO
