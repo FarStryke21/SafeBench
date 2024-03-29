@@ -42,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--tm_port', type=int, default=8000, help='traffic manager port')
     parser.add_argument('--fixed_delta_seconds', type=float, default=0.1)
     parser.add_argument('--max_episode_step', type=int, default=300)
-    parser.add_argument('--patch', type=str, default='stopsign.jpg')
+    parser.add_argument('--patch', type=str, default='stopsign')
     args = parser.parse_args()
     args_dict = vars(args)
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     scenario_config_path = osp.join(args.ROOT_DIR, 'safebench/scenario/config', args.scenario_cfg)
     scenario_config = load_config(scenario_config_path)
     scenario_config['texture_dir'] = f'safebench/scenario/scenario_data/template_od/{args.patch}.jpg'
-
+    print(f"Patch: {args.patch}")
     # main entry with a selected mode
     agent_config.update(args_dict)
     scenario_config.update(args_dict)
