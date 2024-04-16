@@ -10,10 +10,10 @@ target_speed: 30
 dt: 0.5
 lateral_KP: 5.0
 lateral_KI: 0.0
-lateral_KD: 0.0
-longitudinal_KP: 5.0
+lateral_KD: 3.0
+longitudinal_KP: 20.0
 longitudinal_KI: 0.0
-longitudinal_KD: 0.0
+longitudinal_KD: 2.0
 max_steering: 2.0
 max_throttle: 2.0
 
